@@ -31,9 +31,11 @@ public class JdbcTemplateScheduleRepository implements ScheduleRepository {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
+    //일정 생성
     @Transactional
     @Override
     public ScheduleResponseDto saveSchedule(ScheduleRequestDto dto) {
+        //현재 날짜 생성
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String nowStr = now.format(formatter);
@@ -52,28 +54,33 @@ public class JdbcTemplateScheduleRepository implements ScheduleRepository {
 
     }
 
+    //일정 조회(이름, 날짜 둘다 입력했을때)
     @Override
     public List<ScheduleResponseDto> findAllSchedules(String name, String updated) {
             String inputUpdated = updated + "%";
             return jdbcTemplate.query("select * from schedule where name = ? and created like ? order by created desc", scheduleRowMapper(), name, inputUpdated);
     }
 
+    //일정 조회(이름만 입력했을때)
     @Override
     public List<ScheduleResponseDto> findAllSchedulesName(String name) {
         return jdbcTemplate.query("select * from schedule where name = ? order by created desc", scheduleRowMapper(), name);
     }
 
+    //일정 조회(날짜만 입력했을떄)
     @Override
     public List<ScheduleResponseDto> findAllSchedulesUpdated(String updated) {
         String inputUpdated = updated + "%";
         return jdbcTemplate.query("select * from schedule where created like ? order by created desc", scheduleRowMapper(), inputUpdated);
     }
 
+    //일정 조회(둘다 입력안했을때)
     @Override
     public List<ScheduleResponseDto> findAllSchedulesNull() {
         return jdbcTemplate.query("select * from schedule order by created desc", scheduleRowMapper());
     }
 
+    //id값에 맞는 일정있는지 확인, 반환
     @Override
     public ScheduleResponseDto findById(Long id) {
         try {
@@ -84,8 +91,10 @@ public class JdbcTemplateScheduleRepository implements ScheduleRepository {
 
     }
 
+    //일정 수정
     @Override
     public ScheduleResponseDto updateSchedule(Long id, ScheduleRequestDto dto) {
+        //수정 날짜 생성
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String nowStr = now.format(formatter);
@@ -98,11 +107,13 @@ public class JdbcTemplateScheduleRepository implements ScheduleRepository {
     }
 
 
+    //비밀번호 찾기
     @Override
     public Long findPassword(Long id) {
         return jdbcTemplate.queryForObject("select password from schedule where id = ?", scheduleRowMapperPassword(), id);
     }
 
+    //일정 삭제
     @Override
     public void deleteSchedule(Long id) {
         jdbcTemplate.update("delete from schedule where id = ?", id);

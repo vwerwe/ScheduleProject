@@ -18,15 +18,18 @@ public class ScheduleServiceImpl implements ScheduleService{
 
     private final ScheduleRepository scheduleRepository;
 
+    //일정 생성
     @Override
     public ScheduleResponseDto saveSchedule(ScheduleRequestDto dto) {
 
         return scheduleRepository.saveSchedule(dto);
     }
 
+    //일정 조회
     @Override
     public List<ScheduleResponseDto> findAllSchedules(String name, String updated) {
 
+        // 이름, 날짜 존재여부에 따라 메서드 분리
         if (name != null && updated != null) {
             return scheduleRepository.findAllSchedules(name, updated);
         } else if (updated == null && name != null) {
@@ -38,18 +41,23 @@ public class ScheduleServiceImpl implements ScheduleService{
         return scheduleRepository.findAllSchedulesNull();
     }
 
+    //일정 개별 조회
     @Override
     public ScheduleResponseDto findById(Long id) {
         return scheduleRepository.findById(id);
     }
 
+    //일정 수정
     @Override
     public ScheduleResponseDto updateSchedule(Long id, ScheduleRequestDto dto) {
 
-        Long password = scheduleRepository.findPassword(id);
+        scheduleRepository.findById(id);
 
-        log.info("password = {}", password);
-        log.info("getPassword = {}", dto.getPassword());
+        if (dto.getName() == null || dto.getTodo() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        Long password = scheduleRepository.findPassword(id);
 
         if (dto.getPassword() == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -63,6 +71,7 @@ public class ScheduleServiceImpl implements ScheduleService{
 
     }
 
+    //일정 삭제
     @Override
     public void deleteSchedule(Long id, Long password) {
 
